@@ -1,0 +1,23 @@
+# Version control & editor
+.git
+.gitignore
+.idea
+.vscode
+
+# File Docker sendiri
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Tidak dibutuhkan di dalam image
+README.md
+database/
+*.zip
+*.log
+
+# Konfigurasi lokal (berisi password) - jangan ikut ke image
+app/Config/config.local.php
+
+# File sistem
+.DS_Store
+Thumbs.db

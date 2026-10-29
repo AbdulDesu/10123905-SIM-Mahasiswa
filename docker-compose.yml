@@ -1,0 +1,46 @@
+name: sim-mahasiswa
+
+services:
+  web:
+    build: .
+    container_name: sim-mahasiswa-web
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: sim_mahasiswa
+      DB_USER: sim_user
+      DB_PASS: sim_pass_123
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./app:/var/www/html/app:ro
+      - ./public:/var/www/html/public:ro
+      - ./lang:/var/www/html/lang:ro
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11.4
+    container_name: sim-mahasiswa-db
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    environment:
+      MARIADB_ROOT_PASSWORD: root_pass_123
+      MARIADB_DATABASE: sim_mahasiswa
+      MARIADB_USER: sim_user
+      MARIADB_PASSWORD: sim_pass_123
+      TZ: Asia/Jakarta
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb -h127.0.0.1 -uroot -p$$MARIADB_ROOT_PASSWORD -e 'SELECT 1 FROM sim_mahasiswa.users LIMIT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    restart: unless-stopped
+
+volumes:
+  db_data:
